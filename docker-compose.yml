@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  code-model-chat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: code-model-chat
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./outputs/models:/app/outputs/models:ro
+      - ./templates:/app/templates:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    networks:
+      - code-model-network
+
+networks:
+  code-model-network:
+    driver: bridge
