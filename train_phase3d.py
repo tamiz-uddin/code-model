@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """
-Phase 3D: Extended Languages Training Script
+Phase 3D: Extended Languages Training
 Fine-tune on TypeScript, Java, Go, Rust, C#, SQL
 
 Usage:
-    python train_phase3d.py --model outputs/models/fullstack-model-v1.pt
+    python train_phase3d.py
 """
 
 import sys
 import torch
 import yaml
-import argparse
 from pathlib import Path
 
 sys.path.insert(0, str(Path.cwd()))
@@ -19,11 +18,43 @@ from models.architecture import CodeModel
 from training.trainer import CodeModelTrainer
 
 
-def create_dataset():
-    """Create extended languages dataset for Phase 3D."""
-    print("Creating extended languages dataset...")
+def main():
+    """Train Phase 3D model."""
+    print("=" * 70)
+    print("PHASE 3D: EXTENDED LANGUAGES TRAINING")
+    print("=" * 70)
 
-    samples = [
+    # Check GPU
+    print("\n1. Checking GPU...")
+    print(f"   GPU Available: {torch.cuda.is_available()}")
+
+    # Load config
+    print("\n2. Loading configuration...")
+    with open("config.yaml") as f:
+        config = yaml.safe_load(f)
+
+    config["training"]["batch_size"] = 16
+    config["training"]["num_epochs"] = 1
+    config["training"]["learning_rate"] = 1e-6  # Extremely low for fine-tuning
+
+    print(f"   Learning rate: {config['training']['learning_rate']} (fine-tuning)")
+
+    # Load Phase 3C model
+    print("\n3. Loading Phase 3C checkpoint...")
+    model = CodeModel(config["model"]).get_model()
+    model_path = Path("outputs/models/fullstack-model-v1.pt")
+
+    if not model_path.exists():
+        print(f"   ⚠ Model not found: {model_path}")
+        print("   Run Phase 3C first!")
+        return False
+
+    model.load_state_dict(torch.load(model_path))
+    print(f"   ✓ Loaded {model_path}")
+
+    # Create dataset
+    print("\n4. Creating extended languages dataset...")
+    code_samples = [
         # TypeScript
         "interface User { id: number; name: string; email: string; }",
         "type Status = 'active' | 'inactive' | 'pending';",
@@ -67,115 +98,52 @@ def create_dataset():
         "SELECT * FROM users WHERE name LIKE 'J%' AND age BETWEEN 20 AND 30;",
     ]
 
-    samples = samples * 3  # 105 samples
-    print(f"✓ Created {len(samples)} samples")
-    return samples
+    code_samples = code_samples * 3  # 105 samples
 
+    # Convert to dataset format
+    samples = [{"content": code} for code in code_samples]
 
-def train_phase3d(model_path):
-    """Train Phase 3D model."""
-    print("=" * 60)
-    print("PHASE 3D: EXTENDED LANGUAGES TRAINING")
-    print("=" * 60)
-
-    # Check GPU
-    print("\n1. Checking GPU...")
-    print(f"   GPU Available: {torch.cuda.is_available()}")
-
-    # Load config
-    print("\n2. Loading config...")
-    try:
-        with open("config.yaml") as f:
-            config = yaml.safe_load(f)
-    except FileNotFoundError:
-        config = {
-            "model": {
-                "vocab_size": 32000,
-                "n_positions": 2048,
-                "n_embd": 768,
-                "n_layer": 12,
-                "n_head": 12,
-                "activation_function": "gelu_new"
-            },
-            "training": {
-                "batch_size": 16,
-                "learning_rate": 1e-6,
-                "num_epochs": 1,
-                "warmup_steps": 5,
-                "weight_decay": 0.1,
-                "fp16": True,
-                "device": "cuda" if torch.cuda.is_available() else "cpu"
-            }
-        }
-
-    config["training"]["batch_size"] = 16
-    config["training"]["num_epochs"] = 1
-    config["training"]["learning_rate"] = 1e-6  # Extremely low for fine-tuning
-
-    print(f"   Batch size: {config['training']['batch_size']}")
-    print(f"   Learning rate: {config['training']['learning_rate']} (fine-tuning)")
-    print(f"   Epochs: {config['training']['num_epochs']}")
-
-    # Create model
-    print("\n3. Creating model...")
-    model = CodeModel(config["model"]).get_model()
-    print(f"   ✓ Model created")
-
-    # Load Phase 3C checkpoint
-    print("\n4. Loading Phase 3C checkpoint...")
-    if Path(model_path).exists():
-        model.load_state_dict(torch.load(model_path))
-        print(f"   ✓ Loaded: {model_path}")
-    else:
-        print(f"   ⚠ Model not found: {model_path}")
-
-    # Create dataset
-    print("\n5. Creating dataset...")
-    samples = create_dataset()
-    print(f"   ✓ Dataset ready: {len(samples)} samples")
+    print(f"   ✓ Created {len(samples)} samples")
+    print(f"   TypeScript, Java, Go, Rust, C#, SQL")
 
     # Train
-    print("\n6. Starting fine-tuning...")
+    print("\n5. Starting fine-tuning...")
     trainer = CodeModelTrainer(model, config, samples)
     trainer.train()
 
     # Save model
-    print("\n7. Saving model...")
+    print("\n6. Saving model...")
     output_dir = Path("outputs/models")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     model_path = output_dir / "universal-model-v1.pt"
     torch.save(model.state_dict(), model_path)
-    print(f"   ✓ Saved to {model_path}")
-    print(f"   Size: {model_path.stat().st_size / 1e6:.1f} MB")
 
-    print("\n" + "=" * 60)
+    file_size = model_path.stat().st_size / 1e6
+    print(f"   ✓ Saved to {model_path}")
+    print(f"   Size: {file_size:.1f} MB")
+
+    # Summary
+    print("\n" + "=" * 70)
     print("✅ PHASE 3D TRAINING COMPLETE")
-    print("=" * 60)
-    print(f"\nUniversal Model ready: {model_path}")
-    print("Next: Phase 4 (Evaluation)")
+    print("=" * 70)
+    print(f"\nUniversal Model: {model_path}")
+    print(f"Size: {file_size:.1f} MB")
+    print("\nSupports:")
+    print("- JavaScript, Python, TypeScript, Java, Go, Rust, C#")
+    print("- HTML, CSS, React, Express, Django, Flask")
+    print("- SQL, MongoDB, GraphQL, REST APIs")
+    print("\nNext: Phase 4 (Evaluation)")
+    print("\n" + "=" * 70)
 
     return True
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Phase 3D: Extended Languages Training")
-    parser.add_argument(
-        "--model",
-        type=str,
-        default="outputs/models/fullstack-model-v1.pt",
-        help="Path to Phase 3C model checkpoint"
-    )
-    args = parser.parse_args()
-
     try:
-        success = train_phase3d(args.model)
-        sys.exit(0 if success else 1)
-    except KeyboardInterrupt:
-        print("\n\n⚠ Training interrupted by user")
-        sys.exit(1)
+        main()
     except Exception as e:
-        print(f"\n\n❌ Error: {e}")
+        print(f"\n❌ Error: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

@@ -54,7 +54,7 @@ def main():
 
     # Create dataset
     print("\n4. Creating full-stack dataset...")
-    samples = [
+    code_samples = [
         # React
         "function Counter() { const [count, setCount] = useState(0); return <button onClick={() => setCount(count + 1)}>{count}</button>; }",
         "const TodoList = ({ todos }) => todos.map(todo => <li key={todo.id}>{todo.text}</li>);",
@@ -80,9 +80,9 @@ def main():
         "db = SQLAlchemy(app)",
 
         # SQL
-        "SELECT * FROM users WHERE age > 18;",
-        "INSERT INTO users (name, email) VALUES ('John', 'john@example.com');",
-        "UPDATE users SET age = 30 WHERE id = 1;",
+        "SELECT * FROM users WHERE age > 18 ORDER BY name;",
+        "INSERT INTO users (name, email, age) VALUES ('John', 'john@example.com', 30);",
+        "UPDATE users SET age = 31 WHERE id = 1;",
         "DELETE FROM users WHERE id = 1;",
 
         # MongoDB
@@ -107,7 +107,10 @@ def main():
         "const decoded = jwt.verify(token, 'secret');",
     ]
 
-    samples = samples * 2  # 60 samples
+    code_samples = code_samples * 2  # 60 samples
+
+    # Convert to dataset format
+    samples = [{"content": code} for code in code_samples]
 
     print(f"   ✓ Created {len(samples)} samples")
     print(f"   React, Express, Django, Flask, SQL, MongoDB, APIs")

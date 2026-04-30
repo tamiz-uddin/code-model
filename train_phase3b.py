@@ -59,7 +59,7 @@ def main():
 
     # Create dataset
     print("\n4. Creating HTML + CSS dataset...")
-    samples = [
+    code_samples = [
         # HTML samples
         "<!DOCTYPE html>\n<html>\n<head><title>Page</title></head>\n<body><h1>Hello</h1></body>\n</html>",
         "<div class='container'>\n  <header>\n    <nav><a href='/'>Home</a></nav>\n  </header>\n</div>",
@@ -79,7 +79,10 @@ def main():
         "@keyframes slide { from { transform: translateX(0); } to { transform: translateX(100px); } }",
     ]
 
-    samples = samples * 5  # 70 samples
+    code_samples = code_samples * 5  # 70 samples
+
+    # Convert to dataset format
+    samples = [{"content": code} for code in code_samples]
 
     print(f"   ✓ Created {len(samples)} samples")
     print(f"   HTML: 35, CSS: 35")

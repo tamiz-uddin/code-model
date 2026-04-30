@@ -61,7 +61,7 @@ def main():
 
     # Create synthetic dataset
     print("\n4. Creating synthetic dataset...")
-    samples = [
+    code_samples = [
         # JavaScript samples
         "function add(a, b) { return a + b; }",
         "const greet = (name) => `Hello, ${name}!`;",
@@ -84,7 +84,10 @@ def main():
     ]
 
     # Repeat to get more samples
-    samples = samples * 5  # 80 samples total
+    code_samples = code_samples * 5  # 80 samples total
+
+    # Convert to dataset format (list of dicts with "content" key)
+    samples = [{"content": code} for code in code_samples]
 
     print(f"   ✓ Created {len(samples)} samples")
     print(f"   Languages: JavaScript (40), Python (40)")
