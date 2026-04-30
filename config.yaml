@@ -1,0 +1,33 @@
+# AI Code Model Configuration
+# Single source of truth for all hyperparameters
+
+model:
+  vocab_size: 32000
+  n_positions: 2048
+  n_embd: 768
+  n_layer: 12
+  n_head: 12
+  activation_function: "gelu_new"
+
+training:
+  batch_size: 8
+  learning_rate: 5e-4
+  num_epochs: 1
+  warmup_steps: 100
+  weight_decay: 0.1
+  fp16: true
+  logging_steps: 10
+  save_steps: 500
+  eval_steps: 500
+
+data:
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+  max_file_size: 100000
+  min_file_size: 100
+
+output:
+  model_dir: "./outputs/checkpoints"
+  log_dir: "./outputs/logs"
+  final_model_dir: "./outputs/models"
