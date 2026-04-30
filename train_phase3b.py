@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 """
-Phase 3B: Frontend Stack Training
+Phase 3B: Frontend Stack Training (Memory Optimized)
 Fine-tune on HTML + CSS
 
 Usage:
     python train_phase3b.py
-
-Or in Google Colab:
-    !python train_phase3b.py
 """
 
 import sys
@@ -24,24 +21,30 @@ from training.trainer import CodeModelTrainer
 def main():
     """Train Phase 3B model."""
     print("=" * 70)
-    print("PHASE 3B: FRONTEND STACK TRAINING")
+    print("PHASE 3B: FRONTEND STACK TRAINING (OPTIMIZED)")
     print("=" * 70)
 
     # Check GPU
     print("\n1. Checking GPU...")
     print(f"   GPU Available: {torch.cuda.is_available()}")
-    if torch.cuda.is_available():
-        print(f"   GPU Name: {torch.cuda.get_device_name(0)}")
 
     # Load config
     print("\n2. Loading configuration...")
     with open("config.yaml") as f:
         config = yaml.safe_load(f)
 
-    config["training"]["batch_size"] = 16
+    # Optimize for GPU memory
+    config["training"]["batch_size"] = 4
     config["training"]["num_epochs"] = 1
-    config["training"]["learning_rate"] = 1e-5  # Lower for fine-tuning
+    config["training"]["learning_rate"] = 1e-5
 
+    # Reduce model size
+    config["model"]["n_embd"] = 512
+    config["model"]["n_layer"] = 8
+    config["model"]["n_head"] = 8
+    config["model"]["n_positions"] = 1024
+
+    print(f"   Batch size: {config['training']['batch_size']}")
     print(f"   Learning rate: {config['training']['learning_rate']} (fine-tuning)")
 
     # Load Phase 3A model

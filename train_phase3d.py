@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 3D: Extended Languages Training
+Phase 3D: Extended Languages Training (Memory Optimized)
 Fine-tune on TypeScript, Java, Go, Rust, C#, SQL
 
 Usage:
@@ -21,7 +21,7 @@ from training.trainer import CodeModelTrainer
 def main():
     """Train Phase 3D model."""
     print("=" * 70)
-    print("PHASE 3D: EXTENDED LANGUAGES TRAINING")
+    print("PHASE 3D: EXTENDED LANGUAGES TRAINING (OPTIMIZED)")
     print("=" * 70)
 
     # Check GPU
@@ -33,10 +33,18 @@ def main():
     with open("config.yaml") as f:
         config = yaml.safe_load(f)
 
-    config["training"]["batch_size"] = 16
+    # Optimize for GPU memory
+    config["training"]["batch_size"] = 4
     config["training"]["num_epochs"] = 1
-    config["training"]["learning_rate"] = 1e-6  # Extremely low for fine-tuning
+    config["training"]["learning_rate"] = 1e-6
 
+    # Reduce model size
+    config["model"]["n_embd"] = 512
+    config["model"]["n_layer"] = 8
+    config["model"]["n_head"] = 8
+    config["model"]["n_positions"] = 1024
+
+    print(f"   Batch size: {config['training']['batch_size']}")
     print(f"   Learning rate: {config['training']['learning_rate']} (fine-tuning)")
 
     # Load Phase 3C model

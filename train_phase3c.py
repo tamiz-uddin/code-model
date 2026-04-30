@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 3C: Full-Stack Integration Training
+Phase 3C: Full-Stack Integration Training (Memory Optimized)
 Fine-tune on React, Express, Django, Flask, Databases, APIs
 
 Usage:
@@ -21,7 +21,7 @@ from training.trainer import CodeModelTrainer
 def main():
     """Train Phase 3C model."""
     print("=" * 70)
-    print("PHASE 3C: FULL-STACK INTEGRATION TRAINING")
+    print("PHASE 3C: FULL-STACK INTEGRATION TRAINING (OPTIMIZED)")
     print("=" * 70)
 
     # Check GPU
@@ -33,10 +33,18 @@ def main():
     with open("config.yaml") as f:
         config = yaml.safe_load(f)
 
-    config["training"]["batch_size"] = 16
+    # Optimize for GPU memory
+    config["training"]["batch_size"] = 4
     config["training"]["num_epochs"] = 1
-    config["training"]["learning_rate"] = 5e-6  # Even lower for fine-tuning
+    config["training"]["learning_rate"] = 5e-6
 
+    # Reduce model size
+    config["model"]["n_embd"] = 512
+    config["model"]["n_layer"] = 8
+    config["model"]["n_head"] = 8
+    config["model"]["n_positions"] = 1024
+
+    print(f"   Batch size: {config['training']['batch_size']}")
     print(f"   Learning rate: {config['training']['learning_rate']} (fine-tuning)")
 
     # Load Phase 3B model

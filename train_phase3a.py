@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
 """
-Phase 3A: Foundation Model Training
+Phase 3A: Foundation Model Training (Optimized for GPU Memory)
 Train on JavaScript + Python
 
 Usage:
     python train_phase3a.py
-
-Or in Google Colab:
-    !python train_phase3a.py
 """
 
 import sys
 import torch
 import yaml
-import json
 from pathlib import Path
 
-# Add current directory to path
 sys.path.insert(0, str(Path.cwd()))
 
 from models.architecture import CodeModel
@@ -26,7 +21,7 @@ from training.trainer import CodeModelTrainer
 def main():
     """Train Phase 3A model."""
     print("=" * 70)
-    print("PHASE 3A: FOUNDATION MODEL TRAINING")
+    print("PHASE 3A: FOUNDATION MODEL TRAINING (OPTIMIZED)")
     print("=" * 70)
 
     # Check GPU
@@ -35,22 +30,26 @@ def main():
     if torch.cuda.is_available():
         print(f"   GPU Name: {torch.cuda.get_device_name(0)}")
         print(f"   GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")
-    else:
-        print("   ⚠ GPU not available. Training will be slow.")
 
     # Load config
     print("\n2. Loading configuration...")
     with open("config.yaml") as f:
         config = yaml.safe_load(f)
 
-    # Optimize for training
-    config["training"]["batch_size"] = 16
+    # Optimize for GPU memory
+    config["training"]["batch_size"] = 4  # Reduced from 16
     config["training"]["num_epochs"] = 1
     config["training"]["learning_rate"] = 5e-4
 
+    # Reduce model size for GPU memory
+    config["model"]["n_embd"] = 512  # Reduced from 768
+    config["model"]["n_layer"] = 8   # Reduced from 12
+    config["model"]["n_head"] = 8    # Reduced from 12
+    config["model"]["n_positions"] = 1024  # Reduced from 2048
+
     print(f"   Batch size: {config['training']['batch_size']}")
     print(f"   Learning rate: {config['training']['learning_rate']}")
-    print(f"   Epochs: {config['training']['num_epochs']}")
+    print(f"   Model size: {config['model']['n_embd']} emb, {config['model']['n_layer']} layers")
 
     # Create model
     print("\n3. Creating model...")
@@ -77,10 +76,9 @@ def main():
         "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)",
         "def is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return True",
         "class Stack:\n    def __init__(self):\n        self.items = []\n    def push(self, item):\n        self.items.append(item)\n    def pop(self):\n        return self.items.pop()",
-        "def map_fn(arr, fn):\n    return [fn(x) for x in arr]",
-        "def filter_fn(arr, fn):\n    return [x for x in arr if fn(x)]",
-        "def reduce_fn(arr, fn, init):\n    result = init\n    for x in arr:\n        result = fn(result, x)\n    return result",
-        "def generator():\n    yield 1\n    yield 2\n    yield 3",
+        "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)",
+        "def merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    mid = len(arr) // 2\n    left = merge_sort(arr[:mid])\n    right = merge_sort(arr[mid:])\n    return merge(left, right)",
+        "def binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1",
     ]
 
     # Repeat to get more samples
@@ -94,7 +92,7 @@ def main():
 
     # Train
     print("\n5. Starting training...")
-    print("   This may take 30-60 minutes on GPU...")
+    print("   This may take 15-30 minutes on GPU...")
     trainer = CodeModelTrainer(model, config, samples)
     trainer.train()
 
